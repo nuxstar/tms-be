@@ -1,0 +1,659 @@
+openapi: 3.0.3
+info:
+  title: Ticket Management System
+  description: |-
+    The Ticket Management System is an efficient issue tracker designed to streamline the management of accessories such as laptops, mice, headphones, and other related products. Additionally, the system allows users to raise purchase requests for required items within the application.
+  termsOfService: http://localhost:8090
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+servers:
+  - url: http://localhost:8080/api
+tags:
+  - name: Ticket
+  - name: Comment
+paths:
+  /v1/employee/{employeeId}/tickets:
+    post:
+      tags:
+        - Ticket
+      description: To create a new ticket
+      parameters:
+      - in: path
+        name: employeeId
+        description: The page number to retrieve
+        required: true
+        schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ticketTitle:
+                  type: string
+                  example: issue in laptop
+                description:
+                  type: string
+                  example: latest software are not installed
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 201
+                  response:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Ticket'
+        '400':
+          description: Invalid  value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+  /v1/tickets:
+    get:
+      tags:
+        - Ticket
+      description: To returns a list of Ticket with pagination
+      parameters:
+      - in: query
+        name: page
+        description: The page number to retrieve
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - in: query
+        name: size
+        description: The number of projects per page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 200
+                  response:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      content:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Ticket'
+                      totalElements:
+                        type: integer
+                        example: 1
+                      totalPAges: 
+                        type: integer
+                        example: 1
+                      offSet:
+                        type: integer
+                        example: 10
+                      pageNo:
+                        type: integer
+                        example: 0
+                      numberOfElements:
+                        type: integer
+                        example: 1   
+        '400':
+          description: Invalid  value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'  
+  /v1/employees/{employeeId}/tickets:
+    get:
+      tags:
+        - Ticket
+      description: To returns a list of ticket under an employee
+      parameters:
+      - in: path
+        name: employeeId
+        description: The page number to retrieve
+        required: true
+        schema:
+            type: integer
+      - in: query
+        name: page
+        description: The page number to retrieve
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - in: query
+        name: size
+        description: The number of projects per page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 200
+                  response:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      content:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TicketGet'
+                      totalElements:
+                        type: integer
+                        example: 1
+                      totalPAges: 
+                        type: integer
+                        example: 1
+                      offSet:
+                        type: integer
+                        example: 10
+                      pageNo:
+                        type: integer
+                        example: 0
+                      numberOfElements:
+                        type: integer
+                        example: 1 
+        '404':
+          description: Employee not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeNotFound'
+                
+        '400':
+          description: Invalid  value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+  /v1/tickets/{ticketId}:
+    put:
+      tags:
+        - Ticket
+      description: To update the single ticket by ticketId
+      parameters:
+        - name: ticketId
+          in: path
+          description: Id of the ticket to updated
+          required: True
+          schema:
+            type: integer
+            format: numbers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                priority:
+                  type: string
+                  enum: [ "LOW", "MEDIUM", "HIGH"]
+                  default: LOW
+                assignedTo:
+                  type: string
+                  example: infra team
+                status:
+                  type: string
+                  enum: [ "TODO", "IN_PROGRESS", "COMPLETED"]
+                  default: COMPLETED
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 201
+                  response:
+                    type: boolean
+                    example: true
+                  data:  
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Ticket TK01 is updated successfully
+        '400':
+          description: Invalid  value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketNotFound'
+    delete:
+      tags:
+        - Ticket
+      description: To delete a single ticket by ticketId
+      parameters:
+        - name: ticketId
+          in: path
+          description: taskId to delete task
+          required: True
+          schema:
+            type: integer
+            format: numbers
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 200
+                  response:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: ticket TK01 is deleted successfully
+        '404':
+          description: ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketNotFound'
+        '400':
+          description: Invalid  value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+  
+  /v1/tickets/{ticketId}/employee/{employeeId}/comments:
+    post:
+      tags:
+        - Comment
+      description: To create comment by employeeId and projectId
+      parameters:
+        - name: ticketId
+          in: path
+          description: id of the ticket 
+          required: true
+          schema:
+            type: integer
+        - name: employeeId
+          in: path
+          description: id of the employee 
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  example: comment description
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 201
+                  response:
+                    type: boolean
+                    example: true
+                  data:
+                    type: string
+                    example: comment added successfully
+        '400':
+          description: Invalid  value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: Employee not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketNotFound'
+  /v1/tickets/{ticketId}/comments:
+     get:
+      tags:
+        - Comment
+      description: To returns a list of comment under the ticket
+      parameters:
+      - in: path
+        name: ticketId
+        description: The page number to retrieve
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 200
+                  response:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                        comments:
+                          $ref: '#/components/schemas/Comment'
+        '400':
+          description: Invalid  value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'  
+  /v1/comment/{commentId}:
+    put:
+      tags:
+        - Comment
+      description: To update the single comment by task commentId
+      parameters:
+        - name: commentId
+          in: path
+          description: Id of the comment to updated
+          required: True
+          schema:
+            type: integer
+            format: numbers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  example: comment description
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 201
+                  response:
+                    type: boolean
+                    example: true
+                  data:  
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: comment CMT01 is updated successfully
+        '400':
+          description: Invalid  value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentNotFound'
+    delete:
+      tags:
+        - Comment
+      description: To delete a single task by taskId
+      parameters:
+        - name: commentId
+          in: path
+          description: taskId to delete task
+          required: True
+          schema:
+            type: integer
+            format: numbers
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 200
+                  response:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Comment CMT01 is deleted successfully
+        '404':
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentNotFound'
+        '400':
+          description: Invalid  value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+
+  
+components:
+  schemas:
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: numbers
+          example: 1
+        title:
+          type: string
+          example: issue in laptop
+        image:
+          type: array
+          items: 
+            type: object
+            format: byte
+            example: image1
+        description:
+          type: string
+          example: latest software are not installed
+        createdBy:
+          $ref: '#/components/schemas/Employee'
+        assignedTo:
+          $ref: '#/components/schemas/Employee'
+        priority:
+          type: string
+          example: low
+        status:
+          type: string
+          example: TODO
+    TicketGet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: numbers
+          example: 1
+        ticketTitle:
+          type: string
+          example: issue in laptop
+        image:
+          type: string
+          format: byte
+        description:
+          type: string
+          example: latest software are not installed
+        assignedTo:
+          $ref: '#/components/schemas/Employee'
+        priority:
+          type: string
+          example: low
+        status:
+          type: string
+          example: TODO
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: numbers
+          example: 1 
+        description:
+          type: string
+          example: comment description
+        image:
+          type: array
+          items: 
+            type: object
+            format: byte
+            example: image1
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: FS0232
+    EmployeeNotFound:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        response:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Employee Not Found
+            restStatus:
+              type: string
+              example: NOT_FOUND
+    TicketNotFound:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        response:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Ticket Not Found
+            restStatus:
+              type: string
+              example: NOT_FOUND
+    CommentNotFound:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        response:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Comment Not Found
+            restStatus:
+              type: string
+              example: NOT_FOUND
+    BadRequest:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        response:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Invalid Input
+            restStatus:
+              type: string
+              example: BAD-REQUEST

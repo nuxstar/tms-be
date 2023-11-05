@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27028:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: tms
+#    networks:
+#      - common-network
+  be:
+    container_name: tms_be
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      HOST: mongo
+      PORT: "27028"
+      ADMIN_USER: root
+    depends_on:
+      - mongo
+#    networks:
+#      - common-network
+#networks:
+#  common-network:
+#    driver: bridge
+volumes:
+  mongo_data:
+

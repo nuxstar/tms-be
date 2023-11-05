@@ -1,0 +1,33 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /api
+spring:
+  data:
+    mongodb:
+      #      uri: mongodb://root:root@localhost:27028/tms
+      authentication-database: admin
+      host: localhost
+      port: 27028
+      database: tms
+      username: root
+      password: root
+  #      authentication-database: admin
+  #      host: ${HOST}
+  #      port: ${PORT}
+  #      database: tms
+  #      username: ${ADMIN_USER}
+  #      password: ${ADMIN_USER}
+  jackson:
+    mapper:
+      ACCEPT_CASE_INSENSITIVE_ENUMS: true
+security:
+  jwt:
+    secret-key: NDEzRjQ0Mjg0NzJCNEI2MjUwNjU1MzY4NTY2RDU5NzEzMzc0MzY3NzM5NzkyNDQyMjY0NTI5NDg0MDRENjM1MQ==
+    expiration: 86400000
+    basic:
+      enabled: false
+azure:
+  storage:
+    account-name: your-account-name
+    account-key: your-account-key
